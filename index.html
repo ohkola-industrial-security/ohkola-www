@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>otsec.fi — Ohkola Industrial Security Oy // OT Cybersecurity</title>
+<meta name="description" content="Cybersecurity for production environments. OT/IT network security assessments and expert services for industrial and offshore operators. Mäntsälä, Finland — otsec.fi.">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/png" sizes="48x48" href="favicon-48.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:            #050805;
+    --bg-panel:      #0a0f0a;
+    --bg-panel-2:    #0d140d;
+    --line:          #1c3a22;
+    --line-bright:   #2c5c36;
+    --green:         #39ff6a;
+    --green-dim:     #22a84a;
+    --green-faint:   #14622c;
+    --amber:         #ffb000;
+    --red:           #ff5f56;
+    --mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--bg);
+    color:var(--green);
+    font-family:var(--mono);
+    font-size:15px;
+    line-height:1.6;
+    position:relative;
+  }
+  /* CRT scanlines */
+  body::before{
+    content:""; position:fixed; inset:0; z-index:9999; pointer-events:none;
+    background:repeating-linear-gradient(to bottom, rgba(0,0,0,0) 0px, rgba(0,0,0,0) 1px, rgba(0,0,0,0.4) 2px, rgba(0,0,0,0) 3px);
+    opacity:0.5;
+  }
+  /* faint vignette */
+  body::after{
+    content:""; position:fixed; inset:0; z-index:9998; pointer-events:none;
+    background:radial-gradient(ellipse at center, rgba(0,0,0,0) 55%, rgba(0,0,0,0.55) 100%);
+  }
+  @keyframes flicker{
+    0%,100%{opacity:1} 92%{opacity:1} 93%{opacity:0.94} 94%{opacity:1} 96%{opacity:0.97} 97%{opacity:1}
+  }
+  main, header, footer{animation:flicker 7s infinite;}
+  @keyframes blink{0%,49%{opacity:1} 50%,100%{opacity:0}}
+  .cursor{
+    display:inline-block; width:0.5em; height:1em; background:var(--green);
+    margin-left:2px; animation:blink 1s steps(1) infinite; vertical-align:-2px;
+    box-shadow:0 0 8px var(--green);
+  }
+  a{color:inherit;}
+  .wrap{max-width:1140px; margin:0 auto; padding:0 28px;}
+
+  h1,h2,h3,h4{
+    font-family:var(--mono); color:var(--green); font-weight:700;
+    text-shadow:0 0 12px rgba(57,255,106,0.35);
+  }
+  p{color:var(--green-dim);}
+  .prompt{
+    font-size:12.5px; color:var(--green-faint); letter-spacing:0.02em; margin-bottom:10px;
+  }
+  .prompt .at{color:var(--green-dim);}
+  .prompt .cmd{color:var(--green);}
+  .prompt::before{content:"$ "; color:var(--green-dim);}
+
+  /* ---------- header ---------- */
+  header{
+    position:sticky; top:0; z-index:50;
+    background:rgba(5,8,5,0.94);
+    border-bottom:1px solid var(--line);
+  }
+  .navbar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 28px;
+  }
+  .brand{
+    font-size:14px; letter-spacing:0.02em; text-decoration:none; display:flex; align-items:center;
+  }
+  .brand strong{color:var(--green); font-weight:800;}
+  .brand span{color:var(--green-faint); margin-left:6px;}
+  nav.links{display:flex; gap:4px; font-size:12.5px;}
+  nav.links a{
+    text-decoration:none; color:var(--green-dim); padding:6px 10px;
+    border:1px solid transparent; transition:all .12s;
+  }
+  nav.links a::before{content:"["; color:var(--green-faint);}
+  nav.links a::after{content:"]"; color:var(--green-faint);}
+  nav.links a:hover{color:#000; background:var(--green); border-color:var(--green);}
+  nav.links a:hover::before, nav.links a:hover::after{color:#000;}
+  .nav-cta{
+    font-size:12.5px; border:1px solid var(--green); color:var(--green); text-decoration:none;
+    padding:9px 16px; letter-spacing:0.04em; transition:all .12s;
+  }
+  .nav-cta:hover{background:var(--green); color:#000; box-shadow:0 0 16px rgba(57,255,106,0.5);}
+
+  /* ---------- hero ---------- */
+  .hero{border-bottom:1px solid var(--line); padding:64px 0 0 0;}
+  .boot-log{font-size:12px; color:var(--green-faint); margin-bottom:28px; line-height:1.9;}
+  .boot-log .ok{color:var(--green-dim);}
+  .boot-log .tag{color:var(--green); font-weight:700;}
+  h1{
+    font-size:clamp(28px, 4.4vw, 46px); line-height:1.18; letter-spacing:-0.01em;
+    max-width:820px;
+  }
+  h1 .hl{color:var(--amber); text-shadow:0 0 14px rgba(255,176,0,0.45);}
+  .hero-sub{
+    font-size:15.5px; color:var(--green-dim); max-width:600px; margin:22px 0 32px 0;
+  }
+  .hero-cta-row{display:flex; gap:14px; flex-wrap:wrap; margin-bottom:52px;}
+  .btn-primary, .btn-ghost{
+    font-family:var(--mono); font-size:13px; text-decoration:none; letter-spacing:0.03em;
+    padding:12px 22px; transition:all .12s; display:inline-flex; align-items:center; gap:4px;
+  }
+  .btn-primary{background:var(--green); color:#000; border:1px solid var(--green); font-weight:700;}
+  .btn-primary:hover{box-shadow:0 0 20px rgba(57,255,106,0.6);}
+  .btn-ghost{border:1px solid var(--line-bright); color:var(--green-dim);}
+  .btn-ghost:hover{border-color:var(--green); color:var(--green);}
+
+  /* terminal window chrome */
+  .term-window{
+    border:1px solid var(--line-bright); background:var(--bg-panel);
+    box-shadow:0 0 30px rgba(57,255,106,0.06);
+  }
+  .term-bar{
+    display:flex; align-items:center; gap:10px;
+    padding:10px 14px; border-bottom:1px solid var(--line);
+    background:var(--bg-panel-2);
+  }
+  .term-dot{width:10px; height:10px; border-radius:50%;}
+  .term-dot.r{background:var(--red);} .term-dot.a{background:var(--amber);} .term-dot.g{background:var(--green);}
+  .term-title{font-size:11.5px; color:var(--green-faint); margin-left:8px; letter-spacing:0.04em;}
+  .term-body{padding:22px; font-size:12.5px;}
+  .ansi-banner{
+    font-family:var(--mono); color:var(--green); line-height:1.08;
+    font-size:clamp(7px, 1.55vw, 15px); white-space:pre; overflow-x:auto;
+    text-shadow:0 0 14px rgba(57,255,106,0.5); letter-spacing:0;
+  }
+  .diagram-row{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:10px 4px; border-bottom:1px dashed var(--line);
+  }
+  .diagram-row:last-child{border-bottom:none;}
+  .diagram-row .lvl{color:var(--green); font-weight:700;}
+  .diagram-row .desc{color:var(--green-dim);}
+  .diagram-row .tag{color:var(--green-faint); text-align:right;}
+  .diagram-row.dmz{
+    border-top:2px double var(--amber); border-bottom:2px double var(--amber);
+    background:rgba(255,176,0,0.05); margin:4px 0;
+  }
+  .diagram-row.dmz .lvl, .diagram-row.dmz .tag{color:var(--amber);}
+  .blink-tag{animation:blink 1.2s steps(1) infinite; color:var(--amber);}
+
+  /* ---------- section shell ---------- */
+  section{padding:76px 0; border-bottom:1px solid var(--line);}
+  .section-head{margin-bottom:40px;}
+  h2{font-size:clamp(22px,2.8vw,30px);}
+  h2::before{content:"// "; color:var(--green-faint);}
+  .section-note{font-size:13px; color:var(--green-faint); margin-top:8px;}
+
+  /* ---------- panel grid ---------- */
+  .service-grid{
+    display:grid; grid-template-columns:repeat(2, 1fr); gap:1px;
+    background:var(--line); border:1px solid var(--line);
+  }
+  .service-card{
+    background:var(--bg); padding:26px; display:flex; flex-direction:column; gap:12px;
+  }
+  .service-card .tag{font-size:11px; color:var(--amber); letter-spacing:0.06em;}
+  .service-card h3{font-size:16.5px; color:var(--green);}
+  .service-card h3::before{content:"> "; color:var(--green-dim);}
+  .service-card p{font-size:13.5px;}
+  .stack-row{display:flex; flex-wrap:wrap; gap:8px; margin-top:auto; padding-top:6px;}
+  .chip{font-size:11px; color:var(--green-dim); border:1px solid var(--line-bright); padding:3px 8px;}
+
+  /* ---------- about ---------- */
+  .about-grid{display:grid; grid-template-columns:1.3fr 1fr; gap:48px; align-items:start;}
+  .about-text p{font-size:14.5px; margin-bottom:14px; max-width:560px;}
+  .about-text strong{color:var(--green);}
+  .stat-list{border:1px solid var(--line);}
+  .stat-row{
+    display:flex; justify-content:space-between; align-items:baseline;
+    padding:16px 20px; border-bottom:1px solid var(--line);
+  }
+  .stat-row:last-child{border-bottom:none;}
+  .stat-row .num{font-size:22px; color:var(--amber); font-weight:800; text-shadow:0 0 10px rgba(255,176,0,0.4);}
+  .stat-row .lbl{font-size:11px; color:var(--green-faint); text-align:right; letter-spacing:0.02em;}
+
+  /* ---------- contact ---------- */
+  .contact-panel{
+    border:1px solid var(--line-bright); background:var(--bg-panel);
+    padding:44px; display:grid; grid-template-columns:1fr 1fr; gap:36px;
+  }
+  .contact-panel .lead{color:var(--green-dim); font-size:13.5px; max-width:400px;}
+  .contact-fields{font-size:13px; display:flex; flex-direction:column; gap:14px;}
+  .contact-fields .field{border-bottom:1px solid var(--line); padding-bottom:10px;}
+  .contact-fields .field .k{color:var(--green-faint); font-size:10.5px; letter-spacing:0.06em; text-transform:uppercase; margin-bottom:4px;}
+  .contact-fields .field .k::before{content:"# ";}
+  .contact-fields .field .v{color:var(--green);}
+  .contact-fields .field .v a{color:var(--amber); text-decoration:none;}
+  .contact-fields .field .v a:hover{text-decoration:underline;}
+
+  footer{padding:28px 0;}
+  .footer-row{
+    display:flex; justify-content:space-between; align-items:center;
+    font-size:11px; color:var(--green-faint); flex-wrap:wrap; gap:10px;
+  }
+
+  @media (max-width: 760px){
+    nav.links{display:none;}
+    .about-grid{grid-template-columns:1fr;}
+    .service-grid{grid-template-columns:1fr;}
+    .contact-panel{grid-template-columns:1fr; padding:28px 20px;}
+    .diagram-row{flex-direction:column; align-items:flex-start; gap:2px;}
+  }
+  @media (max-width: 520px){
+    .navbar img{display:none !important;}
+    .navbar .divider{display:none !important;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="navbar">
+    <a class="brand" href="#top">
+      <strong>OHKOLA</strong><span>— INDUSTRIAL SECURITY</span>
+    </a>
+    <nav class="links">
+      <a href="#assessments">assessments</a>
+      <a href="#expert-services">expert-services</a>
+      <a href="#about">about</a>
+      <a href="#contact">contact</a>
+    </nav>
+    <div style="display:flex; align-items:center; gap:18px;">
+      <a class="nav-cta" href="#contact">./get-in-touch</a>
+      <span class="divider" style="width:1px; height:26px; background:var(--line-bright);"></span>
+      <img src="logo-nav-terminal.png" alt="Ohkola Industrial Security Oy" width="34" height="34" style="display:block;">
+    </div>
+  </div>
+</header>
+
+<main id="top">
+
+  <section class="hero">
+    <div class="wrap">
+      <div class="boot-log">
+        <div><span class="ok">[  OK  ]</span> booting <span class="tag">otsec.fi</span> — Mäntsälä, Finland</div>
+        <div><span class="ok">[  OK  ]</span> loading segmentation policy ... <span class="tag">IT / OT boundary enforced</span></div>
+        <div><span class="ok">[  OK  ]</span> operator: Ohkola Industrial Security Oy</div>
+      </div>
+      <h1>OT / IT security and network engineering for production environments.<span class="cursor"></span></h1>
+      <p class="hero-sub">28+ years of network and security engineering — assessments, architecture, and hands-on expert services for offshore platforms, energy infrastructure, manufacturing and factory sites, and utilities including water.</p>
+      <div class="hero-cta-row">
+        <a class="btn-primary" href="#contact">./get-in-touch --now</a>
+        <a class="btn-ghost" href="#assessments">cat assessments.md</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="assessments">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="prompt">otsec<span class="at">@</span>ohkola<span class="at">:~$</span> <span class="cmd">cat assessments.md</span></p>
+        <h2>Cybersecurity assessments</h2>
+        <p class="section-note">Scope agreed with the client — one target site, or several.</p>
+      </div>
+      <div class="service-grid">
+        <div class="service-card">
+          <span class="tag">GATHER</span>
+          <h3>The information that determines cybersecurity</h3>
+          <p>The automation system and the systems around it. The site network and its firewalls. Remote access, and what's on the other end of it. The cybersecurity of suppliers and service providers connected to the site.</p>
+          <div class="stack-row"><span class="chip">automation_system</span><span class="chip">site_network</span><span class="chip">remote_access</span><span class="chip">supplier_risk</span></div>
+        </div>
+        <div class="service-card">
+          <span class="tag">EVALUATE</span>
+          <h3>Administrative &amp; technical maturity</h3>
+          <p>Where the client's own administrative and technical cybersecurity competence currently stands, so recommendations land at the right level rather than the generic one.</p>
+          <div class="stack-row"><span class="chip">admin_controls</span><span class="chip">technical_controls</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="expert-services">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="prompt">otsec<span class="at">@</span>ohkola<span class="at">:~$</span> <span class="cmd">cat expert-services.md</span></p>
+        <h2>Expert services</h2>
+        <p class="section-note">For new-build and retrofit projects in the client's production systems.</p>
+      </div>
+      <div class="service-grid">
+        <div class="service-card">
+          <span class="tag">SYSTEMS</span>
+          <h3>System engineering</h3>
+          <p>Server and platform build across the system layers that sit alongside the automation network — Linux, Windows, and virtualised infrastructure (ESXi/VMware).</p>
+        </div>
+        <div class="service-card">
+          <span class="tag">NETWORKS</span>
+          <h3>Network engineering</h3>
+          <p>Enterprise and industrial network design and build — leaf/spine architectures, system-bus and field-bus topologies, switching and routing across IT and OT.</p>
+        </div>
+        <div class="service-card">
+          <span class="tag">ARCHITECTURE</span>
+          <h3>Network architecture, security zones &amp; NGFW firewalls</h3>
+          <p>Zone and conduit design, segmentation between IT and OT, and deployment of next-generation industrial firewalls at the boundary.</p>
+          <div class="stack-row"><span class="chip">hirschmann</span><span class="chip">ruggedcom</span><span class="chip">cisco</span><span class="chip">checkpoint</span><span class="chip">fortinet</span></div>
+        </div>
+        <div class="service-card">
+          <span class="tag">COMMISSIONING</span>
+          <h3>Commissioning, CSAT &amp; FAT</h3>
+          <p>On-site commissioning and Site/Factory Acceptance Testing of network and security infrastructure ahead of handover.</p>
+        </div>
+        <div class="service-card">
+          <span class="tag">REMOTE ACCESS</span>
+          <h3>Remote access built to industry best practice</h3>
+          <p>Remote access paths designed and configured the way the sector's best practice — not the vendor's default — says they should be.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="about">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="prompt">otsec<span class="at">@</span>ohkola<span class="at">:~$</span> <span class="cmd">whoami</span></p>
+        <h2>About</h2>
+      </div>
+      <div class="about-grid">
+        <div class="about-text">
+          <p><strong>Ohkola Industrial Security Oy</strong> is an independent OT/IT cybersecurity and industrial network engineering practice based in Mäntsälä, Finland.</p>
+          <p>28+ years of network and security engineering experience, focused on industrial control systems: the network architecture, hardware, and segmentation that keep operational technology running independently of the enterprise IT environment around it. Work spans offshore platforms, energy infrastructure, manufacturing and factory sites, and utilities including water.</p>
+          <p>Work is taken as single contracts, one engagement at a time — full attention on one client's network rather than a portfolio spread thin.</p>
+        </div>
+        <div class="stat-list">
+          <div class="stat-row"><span class="num">28+</span><span class="lbl">YEARS OF NETWORK &amp;<br>SECURITY ENGINEERING</span></div>
+          <div class="stat-row"><span class="num">1</span><span class="lbl">CONTRACT AT A TIME —<br>FULL FOCUS</span></div>
+          <div class="stat-row"><span class="num">FI</span><span class="lbl">MÄNTSÄLÄ, FINLAND<br>ON-SITE OR REMOTE</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact" style="border-bottom:none;">
+    <div class="wrap">
+      <div class="contact-panel">
+        <div>
+          <p class="prompt">otsec<span class="at">@</span>ohkola<span class="at">:~$</span> <span class="cmd">./contact --init</span></p>
+          <h2>Contact</h2>
+          <p class="lead">A system is only as strong as its weakest link. Protection and detection have to be built correctly, supply-chain attacks have to be stoppable, and the details are what decide it — automation's cybersecurity included.</p>
+        </div>
+        <div class="contact-fields">
+          <div class="field">
+            <div class="k">email</div>
+            <div class="v"><a href="mailto:info@otsec.fi">info@otsec.fi</a></div>
+          </div>
+          <div class="field">
+            <div class="k">location</div>
+            <div class="v">Mäntsälä, Finland</div>
+          </div>
+          <div class="field">
+            <div class="k">company</div>
+            <div class="v">Ohkola Industrial Security Oy</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap footer-row">
+    <span>© <span id="year"></span> OHKOLA INDUSTRIAL SECURITY OY</span>
+    <span>OTSEC.FI — MÄNTSÄLÄ, FINLAND</span>
+  </div>
+</footer>
+
+<script>
+  document.getElementById('year').textContent = new Date().getFullYear();
+</script>
+</body>
+</html>
